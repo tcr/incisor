@@ -1,0 +1,13 @@
+environment:
+  global: {}
+install:
+  - echo Setup Windows
+build_script:
+  - echo Build Windows
+clone_depth: 10
+cache:
+  - '%CYG_CACHE%'
+test: 'off'
+branches:
+  only:
+    - master

@@ -1,0 +1,11 @@
+env:
+  global: []
+install:
+  - echo Setup OSX
+script:
+  - echo Build OSX
+language: objective-c
+notifications:
+  email: false
+matrix:
+  fast_finish: true

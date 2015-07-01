@@ -3,6 +3,17 @@ var jp = require('json-pointer')
 var difflet = require('difflet');
 var quote = require('shell-quote').quote;
 
+;(function () {
+  var safe = jp.get;
+
+  jp.get = function (root, path, def) {
+    if (arguments.length > 2 && !jp.has(root, path)) {
+      return def;
+    }
+    return safe(root, path);
+  }
+})();
+
 function convert (data) {
   var ci = {};
 
@@ -16,8 +27,8 @@ function convert (data) {
     if (build.os == 'windows') {
       var env;
       jp.set(ci, '/appveyor/environment/global', env = {});
-      augment(env, jp.has(build, '/env/') ? jp.get(build, '/env') : {});
-      augment(env, jp.get(data, '/common/env'));
+      augment(env, jp.get(build, '/env', {}));
+      augment(env, jp.get(data, '/common/env', {}));
 
       if (jp.has(build, '/git')) {
         Object.keys(jp.get(build, '/git')).map(function (key) {
@@ -38,8 +49,8 @@ function convert (data) {
 
     if (build.os == 'osx') {
       var env = {};
-      augment(env, jp.has(build, '/env/') ? jp.get(build, '/env') : {});
-      augment(env, jp.get(data, '/common/env'));
+      augment(env, jp.get(build, '/env', {}));
+      augment(env, jp.get(data, '/common/env', {}));
 
       jp.set(ci, '/travis/env/global', Object.keys(env).map(function (key) {
         return key + '=' + quote([env[key]]);
@@ -58,8 +69,8 @@ function convert (data) {
     if (build.os == 'linux') {
       var env;
       jp.set(ci, '/circle/machine/environment', env = {});
-      augment(env, jp.has(build, '/env/') ? jp.get(build, '/env') : {});
-      augment(env, jp.get(data, '/common/env'));
+      augment(env, jp.get(build, '/env', {}));
+      augment(env, jp.get(data, '/common/env', {}));
 
       // TODO git autocrlf
 

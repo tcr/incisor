@@ -1,0 +1,10 @@
+machine:
+  environment: {}
+dependencies:
+  post:
+    - echo Setup Linux
+test:
+  override:
+    - echo Build Linux
+general:
+  build_dir: .
