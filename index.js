@@ -76,7 +76,7 @@ function convert (data) {
 
       jp.set(ci, '/circle/dependencies/override', []);
       if (jp.has(build, '/stages/setup')) {
-        jp.set(ci, '/circle/dependencies/post', jp.get(build, '/stages/setup'));
+        jp.set(ci, '/circle/dependencies/override', jp.get(build, '/stages/setup'));
       }
       if (jp.has(build, '/stages/build')) {
         // TODO is 'test' the right thing here
