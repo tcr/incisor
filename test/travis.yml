@@ -1,0 +1,39 @@
+# Mac OS X (https://github.com/travis-ci-tester/toolchain-table)
+
+env:
+  global:
+    - AWS_DEFAULT_REGION=us-east-1
+
+language: objective-c
+
+install:
+  - sudo easy_install pip
+  - sudo pip install awscli
+  - brew tap homebrew/versions
+  - brew install gcc48 gawk
+
+script:
+  - alias gawk=gcc
+  - mkdir -p build/ardupilot
+  - >
+    pushd build
+    && wget -qO ardupilot.tar.gz https://github.com/tcr3dr/ardupilot/archive/builder-3.3-rc5.tar.gz
+    && tar -xf ardupilot.tar.gz --strip-components=1 -C ardupilot
+    && popd
+  - >
+    pushd build/ardupilot/ArduCopter
+    && (make configure || true)
+    && make sitl -j64 NATIVE_CXX=g++-4.8 NATIVE_CC=gcc-4.8 NATIVE_AS=gcc-4.8 NATIVE_LD=g++-4.8
+    && (cp /tmp/ArduCopter.build/ArduCopter.elf . || true)
+    && tar -cvf ../../sitl.tar.gz ./ArduCopter.elf
+    && popd
+  - >
+    export DK_VERSION=$(awk -F\" '/define THISFIRMWARE.*Copter/ { print $2 }' build/ardupilot/ArduCopter/* | awk '{ print tolower($2) }');
+    echo $DK_VERSION;
+    aws s3 cp build/sitl.tar.gz s3://dronekit-sitl-binaries/copter/sitl-osx-$DK_VERSION.tar.gz --acl public-read
+
+notifications:
+  email: false
+
+matrix:
+  fast_finish: true

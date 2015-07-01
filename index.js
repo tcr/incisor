@@ -2,6 +2,7 @@ var yaml = require('js-yaml');
 var fs = require('fs');
 var jp = require('json-pointer')
 var difflet = require('difflet');
+var quote = require('shell-quote').quote;
 
 var data = yaml.safeLoad(fs.readFileSync(__dirname + '/test/molar.yml', 'utf-8'))
 
@@ -17,7 +18,7 @@ jp.get(data, '/builds').map(function (build) {
   if (build.os == 'windows') {
     var env;
     jp.set(ci, '/appveyor/environment/global', env = {});
-    augment(env, jp.get(build, '/env'));
+    augment(env, jp.has(build, '/env/') ? jp.get(build, '/env') : {});
     augment(env, jp.get(data, '/common/env'));
 
     if (jp.has(build, '/git')) {
@@ -36,7 +37,43 @@ jp.get(data, '/builds').map(function (build) {
       jp.set(ci, '/appveyor/build_script', jp.get(build, '/stages/build'));
     }
   }
-})
+
+  if (build.os == 'osx') {
+    var env = {};
+    augment(env, jp.has(build, '/env/') ? jp.get(build, '/env') : {});
+    augment(env, jp.get(data, '/common/env'));
+
+    jp.set(ci, '/travis/env/global', Object.keys(env).map(function (key) {
+      return key + '=' + quote([env[key]]);
+    }));
+
+    // TODO git autocrlf
+
+    if (jp.has(build, '/stages/setup')) {
+      jp.set(ci, '/travis/install', jp.get(build, '/stages/setup'));
+    }
+    if (jp.has(build, '/stages/build')) {
+      jp.set(ci, '/travis/script', jp.get(build, '/stages/build'));
+    }
+  }
+
+  if (build.os == 'linux') {
+    var env;
+    jp.set(ci, '/circle/machine/environment', env = {});
+    augment(env, jp.has(build, '/env/') ? jp.get(build, '/env') : {});
+    augment(env, jp.get(data, '/common/env'));
+
+    // TODO git autocrlf
+
+    if (jp.has(build, '/stages/setup')) {
+      jp.set(ci, '/circle/dependencies/post', jp.get(build, '/stages/setup'));
+    }
+    if (jp.has(build, '/stages/build')) {
+      // TODO is 'test' the right thing here
+      jp.set(ci, '/circle/test/override', jp.get(build, '/stages/build'));
+    }
+  }
+});
 
 if (jp.has(ci, '/appveyor')) {
   // To match Circle CI
@@ -63,6 +100,25 @@ if (jp.has(ci, '/appveyor')) {
   }));
 }
 
+if (jp.has(ci, '/travis')) {
+  // Force OS X.
+  jp.set(ci, '/travis/language', 'objective-c');
+
+  // Is this necessary?
+  jp.set(ci, '/travis/notifications/email', false)
+
+  // Force cancellation on command failure
+  jp.set(ci, '/travis/matrix/fast_finish', true)
+}
+
+if (jp.has(ci, '/circle')) {
+  // Set current build dir
+  // TODO necessary?
+  jp.set(ci, '/circle/general/build_dir', '.')
+}
+
 // console.log(require('util').inspect(ci, null, null));
-var s = difflet.compare(ci.appveyor, yaml.safeLoad(fs.readFileSync(__dirname + '/test/appveyor.yml', 'utf-8')));
+// var s = difflet.compare(ci.appveyor, yaml.safeLoad(fs.readFileSync(__dirname + '/test/appveyor.yml', 'utf-8')));
+var cmp = yaml.safeLoad(fs.readFileSync(__dirname + '/test/circle.yml', 'utf-8'));
+var s = difflet.compare(ci.circle, cmp);
 process.stdout.write(s);

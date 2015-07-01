@@ -1,0 +1,33 @@
+machine:
+  environment:
+    AWS_DEFAULT_REGION: us-east-1
+
+general:
+  build_dir: .
+
+dependencies:
+  post:
+    - sudo apt-get install -y gcc-arm-linux-gnueabi make gcc-4.8 g++-4.8
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+    - sudo pip install awscli
+
+test:
+  override:
+    - mkdir -p build/ardupilot
+    - >
+      pushd build
+      && wget -qO ardupilot.tar.gz https://github.com/tcr3dr/ardupilot/archive/builder-3.3-rc5.tar.gz
+      && tar -xf ardupilot.tar.gz --strip-components=1 -C ardupilot
+      && popd
+    - >
+      pushd build/ardupilot/ArduCopter
+      && (make configure || true)
+      && make sitl -j64
+      && (cp /tmp/ArduCopter.build/ArduCopter.elf . || true)
+      && tar -cvf ../../sitl.tar.gz ./ArduCopter.elf
+      && popd
+    - >
+      export DK_VERSION=$(awk -F\" '/define THISFIRMWARE.*Copter/ { print $2 }' build/ardupilot/ArduCopter/* | awk '{ print tolower($2) }');
+      echo $DK_VERSION;
+      aws s3 cp build/sitl.tar.gz s3://dronekit-sitl-binaries/copter/sitl-linux-$DK_VERSION.tar.gz --acl public-read
