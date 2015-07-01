@@ -1,0 +1,79 @@
+environment:
+  global:
+    CYG_ROOT: C:\cygwin
+    CYG_MIRROR: http://cygwin.mirror.constant.com
+    CYG_CACHE: C:\cygwin\var\cache\setup
+    CYG_BASH: C:\cygwin\bin\bash
+    PYTHON: "C:\\Python27"
+    PYTHON_VERSION: "2.7.8"
+    PYTHON_ARCH: "32"
+    AWS_DEFAULT_REGION: us-east-1
+
+#
+# Cache Cygwin files to speed up build
+#
+cache:
+    - '%CYG_CACHE%'
+
+#
+# Do a shallow clone of the repo to speed up build
+#
+clone_depth: 10
+
+#
+# Initialisation prior to pulling the Mono repository
+# Attempt to ensure we don't try to convert line endings to Win32 CRLF as this will cause build to fail
+#
+init:
+    - git config --global core.autocrlf input
+
+#
+# Install needed build dependencies
+# 
+install:
+    - ps: 'Start-FileDownload "http://cygwin.com/setup-x86.exe" -FileName "setup-x86.exe"'
+    - 'setup-x86.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages autoconf,automake,bison,gcc-core,gcc-g++,mingw-runtime,mingw-binutils,mingw-gcc-core,mingw-gcc-g++,mingw-pthreads,mingw-w32api,libtool,make,python,gettext-devel,gettext,intltool,libiconv,pkg-config,git,curl > NUL 2>&1'
+    - '%CYG_BASH% -lc "cygcheck -dc cygwin"'
+    - python -V
+    - ps: python -m pip install --upgrade setuptools pip wheel
+
+# Cygwin build script
+#
+# NOTES:
+#
+# The stdin/stdout file descriptor appears not to be valid for the Appveyor
+# build which causes failures as certain functions attempt to redirect 
+# default file handles. Ensure a dummy file descriptor is opened with 'exec'.
+#
+build_script:
+  - ps: echo Building... in $(get-location)
+  - >
+    %CYG_BASH% -lc "exec 0</dev/null;
+    export FOLDER=${APPVEYOR_BUILD_FOLDER//\\\\/\\/};
+    cd $FOLDER
+    && mkdir -p build/ardupilot
+    && cd build
+    && wget -qO ardupilot.tar.gz https://github.com/tcr3dr/ardupilot/archive/builder-3.3-rc5.tar.gz
+    && tar -xf ardupilot.tar.gz --strip-components=1 -C ardupilot
+    && cd ardupilot/ArduCopter
+    && (make configure SKETCHBOOK=$FOLDER/build/ardupilot || true)
+    && make sitl SKETCHBOOK=$FOLDER/build/ardupilot -j64
+    && (cp /tmp/ArduCopter.build/ArduCopter.elf . || true)
+    && cd $FOLDER
+    && tar -cvf sitl.tar.gz $FOLDER/build/ardupilot/ArduCopter/ArduCopter.elf c:/cygwin/bin/cyggcc_s-1.dll c:/cygwin/bin/cygstdc++-6.dll c:/cygwin/bin/cygwin1.dll
+    "
+  - ps: $DK_VERSION= C:\cygwin\bin\bash -lc "cd `$APPVEYOR_BUILD_FOLDER; awk -F\\\"" '/define THISFIRMWARE.*Copter/ { print `$2 }' build/ardupilot/ArduCopter/* | awk '{ print tolower(`$2) }'"
+  - ps: echo $DK_VERSION
+  - ps: aws s3 cp sitl.tar.gz s3://dronekit-sitl-binaries/copter/sitl-win-$DK_VERSION.tar.gz --acl public-read
+
+#
+# Disable tests for now
+# 
+test: off
+
+#
+# Only build the master branch
+#
+branches:
+  only:
+    - master

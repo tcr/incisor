@@ -1,0 +1,97 @@
+common:
+  env:
+    AWS_DEFAULT_REGION: us-east-1
+  secure_env:
+    AWS_ACCESS_KEY_ID: +QwjcKRsHjoVkkXMjaZMIyvx5i0bBb+0Nn6hJt7Q+lg=
+    AWS_SECRET_ACCESS_KEY: Mq1LkabyZWfPFYrjjx5bNPSHh3s0uqMETKgVzKQ6ZTl+fCA75qn3L6JSCYqKkmHW
+
+builds:
+  - os: windows
+    git:
+      autocrlf: input
+    env:
+      CYG_ROOT: C:\cygwin
+      CYG_MIRROR: http://cygwin.mirror.constant.com
+      CYG_CACHE: C:\cygwin\var\cache\setup
+      CYG_BASH: C:\cygwin\bin\bash
+      PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.8"
+      PYTHON_ARCH: "32"
+    stages:
+      setup:
+        - ps: 'Start-FileDownload "http://cygwin.com/setup-x86.exe" -FileName "setup-x86.exe"'
+        - 'setup-x86.exe --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages autoconf,automake,bison,gcc-core,gcc-g++,mingw-runtime,mingw-binutils,mingw-gcc-core,mingw-gcc-g++,mingw-pthreads,mingw-w32api,libtool,make,python,gettext-devel,gettext,intltool,libiconv,pkg-config,git,curl > NUL 2>&1'
+        - '%CYG_BASH% -lc "cygcheck -dc cygwin"'
+        - python -V
+        - ps: python -m pip install --upgrade setuptools pip wheel
+      build:
+        - ps: echo Building... in $(get-location)
+        - cygwin: >
+            export FOLDER=${APPVEYOR_BUILD_FOLDER//\\\\/\\/};
+            cd $FOLDER
+            && mkdir -p build/ardupilot
+            && cd build
+            && wget -qO ardupilot.tar.gz https://github.com/tcr3dr/ardupilot/archive/builder-3.3-rc5.tar.gz
+            && tar -xf ardupilot.tar.gz --strip-components=1 -C ardupilot
+            && cd ardupilot/ArduCopter
+            && (make configure SKETCHBOOK=$FOLDER/build/ardupilot || true)
+            && make sitl SKETCHBOOK=$FOLDER/build/ardupilot -j64
+            && (cp /tmp/ArduCopter.build/ArduCopter.elf . || true)
+            && cd $FOLDER
+            && tar -cvf sitl.tar.gz $FOLDER/build/ardupilot/ArduCopter/ArduCopter.elf c:/cygwin/bin/cyggcc_s-1.dll c:/cygwin/bin/cygstdc++-6.dll c:/cygwin/bin/cygwin1.dll
+        - ps: $DK_VERSION= C:\cygwin\bin\bash -lc "cd `$APPVEYOR_BUILD_FOLDER; awk -F\\\"" '/define THISFIRMWARE.*Copter/ { print `$2 }' build/ardupilot/ArduCopter/* | awk '{ print tolower(`$2) }'"
+        - ps: echo $DK_VERSION
+        - ps: aws s3 cp sitl.tar.gz s3://dronekit-sitl-binaries/copter/sitl-win-$DK_VERSION.tar.gz --acl public-read
+
+  - os: linux
+    stages:
+      setup:
+        - sudo apt-get install -y gcc-arm-linux-gnueabi make gcc-4.8 g++-4.8
+        - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+        - sudo pip install awscli
+      build:
+        - mkdir -p build/ardupilot
+        - >
+          pushd build
+          && wget -qO ardupilot.tar.gz https://github.com/tcr3dr/ardupilot/archive/builder-3.3-rc5.tar.gz
+          && tar -xf ardupilot.tar.gz --strip-components=1 -C ardupilot
+          && popd
+        - >
+          pushd build/ardupilot/ArduCopter
+          && (make configure || true)
+          && make sitl -j64
+          && (cp /tmp/ArduCopter.build/ArduCopter.elf . || true)
+          && tar -cvf ../../sitl.tar.gz ./ArduCopter.elf
+          && popd
+        - >
+          export DK_VERSION=$(awk -F\" '/define THISFIRMWARE.*Copter/ { print $2 }' build/ardupilot/ArduCopter/* | awk '{ print tolower($2) }');
+          echo $DK_VERSION;
+          aws s3 cp build/sitl.tar.gz s3://dronekit-sitl-binaries/copter/sitl-linux-$DK_VERSION.tar.gz --acl public-read
+
+  - os: osx
+    stages:
+      setup:
+        - sudo easy_install pip
+        - sudo pip install awscli
+        - brew tap homebrew/versions
+        - brew install gcc48 gawk
+      build:
+        - alias gawk=gcc
+        - mkdir -p build/ardupilot
+        - >
+          pushd build
+          && wget -qO ardupilot.tar.gz https://github.com/tcr3dr/ardupilot/archive/builder-3.3-rc5.tar.gz
+          && tar -xf ardupilot.tar.gz --strip-components=1 -C ardupilot
+          && popd
+        - >
+          pushd build/ardupilot/ArduCopter
+          && (make configure || true)
+          && make sitl -j64 NATIVE_CXX=g++-4.8 NATIVE_CC=gcc-4.8 NATIVE_AS=gcc-4.8 NATIVE_LD=g++-4.8
+          && (cp /tmp/ArduCopter.build/ArduCopter.elf . || true)
+          && tar -cvf ../../sitl.tar.gz ./ArduCopter.elf
+          && popd
+        - >
+          export DK_VERSION=$(awk -F\" '/define THISFIRMWARE.*Copter/ { print $2 }' build/ardupilot/ArduCopter/* | awk '{ print tolower($2) }');
+          echo $DK_VERSION;
+          aws s3 cp build/sitl.tar.gz s3://dronekit-sitl-binaries/copter/sitl-osx-$DK_VERSION.tar.gz --acl public-read
