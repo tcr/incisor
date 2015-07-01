@@ -8,5 +8,10 @@
   },
   "keywords": [],
   "author": "Tim Cameron Ryan",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "difflet": "^0.2.6",
+    "js-yaml": "^3.3.1",
+    "json-pointer": "^0.3.0"
+  }
 }
