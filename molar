@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+var yaml = require('js-yaml');
+var molar = require('./');
+var fs = require('fs');
+
+var data = yaml.safeLoad(fs.readFileSync(process.argv[2], 'utf-8'))
+
+var ci = molar.convert(data);
+
+if (ci.circle) {
+  console.log('writing circle')
+  fs.writeFileSync('circle.yml', yaml.safeDump(ci.circle));
+}
+if (ci.appveyor) {
+  console.log('writing appveyor')
+  fs.writeFileSync('appveyor.yml', yaml.safeDump(ci.appveyor));
+}
+if (ci.travis) {
+  console.log('writing travis')
+  fs.writeFileSync('travis.yml', yaml.safeDump(ci.travis));
+}
+
+console.log('dne');
