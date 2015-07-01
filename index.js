@@ -74,6 +74,7 @@ function convert (data) {
 
       // TODO git autocrlf
 
+      jp.set(ci, '/circle/dependencies/override', []);
       if (jp.has(build, '/stages/setup')) {
         jp.set(ci, '/circle/dependencies/post', jp.get(build, '/stages/setup'));
       }

@@ -1,6 +1,7 @@
 machine:
   environment: {}
 dependencies:
+  override: []
   post:
     - echo Setup Linux
 test:
