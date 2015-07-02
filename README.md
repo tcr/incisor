@@ -2,9 +2,9 @@
 
 CI integration shouldn't be like pulling teeth!
 
-<code>Windows: [![Build status](https://ci.appveyor.com/api/projects/status/oj15ma4ayu7bimmp/branch/master?svg=true)](https://ci.appveyor.com/project/tcr/molar/branch/master)</code><br>
-<code>Linux:&nbsp;&nbsp; [![Circle CI](https://circleci.com/gh/tcr/molar/tree/master.svg?style=svg)](https://circleci.com/gh/tcr/molar/tree/master)</code><br>
-<code>OS X:&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.org/tcr/molar.svg?branch=master)](https://travis-ci.org/tcr/molar)</code>
+<code>Windows: [![Build status](https://ci.appveyor.com/api/projects/status/bcfogndqpcfiau67/branch/master?svg=true)](https://ci.appveyor.com/project/tcr/incisor/branch/master)</code><br>
+<code>Linux:&nbsp;&nbsp; [![Circle CI](https://circleci.com/gh/tcr/incisor/tree/master.svg?style=svg)](https://circleci.com/gh/tcr/incisor/tree/master)</code><br>
+<code>OS X:&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.org/tcr/incisor.svg?branch=master)](https://travis-ci.org/tcr/incisor)</code>
 
 stages:
 
@@ -15,6 +15,8 @@ stages:
 All commands run in separate subshells.
 
 Test isn't currently implemented.
+
+Secret key: `ENV_SECRET`
 
 ---
 
