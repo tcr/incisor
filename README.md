@@ -2,6 +2,10 @@
 
 CI integration shouldn't be like pulling teeth!
 
+<code>Windows: [![Build status](https://ci.appveyor.com/api/projects/status/oj15ma4ayu7bimmp/branch/master?svg=true)](https://ci.appveyor.com/project/tcr/molar/branch/master)</code><br>
+<code>Linux:&nbsp;&nbsp; [![Circle CI](https://circleci.com/gh/tcr/molar/tree/master.svg?style=svg)](https://circleci.com/gh/tcr/molar/tree/master)</code><br>
+<code>OS X:&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.org/tcr/molar.svg?branch=master)](https://travis-ci.org/tcr/molar)</code>
+
 stages:
 
 * setup
