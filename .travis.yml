@@ -7,8 +7,6 @@ install:
   - (a; npm install );z
 after_script:
   - (a; npm test );z
-  - (a; false );z
-  - (a; echo dont go here );z
 script: []
 git:
   depth: 10
