@@ -1,28 +1,12 @@
 machine:
-  environment:
-    MOLAR: 1
-    HELLO: U2FsdGVkX1940igK3ga6hIrpkZZgQShveatTFrIx0Gc=
+  environment: {}
 dependencies:
   override:
-    - echo Setup Linux:
-        environment:
-          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+    - npm install:
+        environment: {}
 test:
   override:
-    - 'echo "A greeting:" $HELLO':
-        environment:
-          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
-    - (pwd; cd /):
-        environment:
-          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
-    - (pwd; cd /):
-        environment:
-          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
-    - pwd; cd /:
-        environment:
-          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
-    - pwd; cd /:
-        environment:
-          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+    - npm test:
+        environment: {}
 general:
   build_dir: .

@@ -1,43 +1,21 @@
-common:
-  env:
-    MOLAR: 1
-  secret_env:
-    HELLO: U2FsdGVkX1940igK3ga6hIrpkZZgQShveatTFrIx0Gc=
-
 builds:
   - os: windows
     stages:
       setup:
-        - echo Setup Windows
+        - npm install
       build:
-        - ps: echo "A greeting:" $env:HELLO
-        - setlocal & echo %cd% & cd c:\ & echo %cd% & endlocal
-        - setlocal & echo %cd% & cd c:\ & echo %cd% & endlocal
-        - echo %cd% & cd c:\ & echo %cd%
-        - echo %cd% & cd c:\ & echo %cd%
-        - ps: "powershell{ get-location; cd c:\\; get-location }"
-        - ps: "powershell{ get-location; cd c:\\; get-location }"
-        - ps: get-location; cd c:\; get-location
-        - ps: get-location; cd c:\; get-location
+        - npm test
 
   - os: linux
     stages:
       setup:
-        - echo Setup Linux
+        - npm install
       build:
-        - echo "A greeting:" $HELLO
-        - (pwd; cd /)
-        - (pwd; cd /)
-        - pwd; cd /
-        - pwd; cd /
+        - npm test
 
   - os: osx
     stages:
       setup:
-        - echo Setup OSX
+        - npm install
       build:
-        - echo "A greeting:" $HELLO
-        - (pwd; cd /)
-        - (pwd; cd /)
-        - pwd; cd /
-        - pwd; cd /
+        - npm test
