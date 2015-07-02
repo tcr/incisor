@@ -137,7 +137,7 @@ function convert (data) {
         'true'
       ]);
       if (jp.has(build, '/stages/setup')) {
-        jp.set(ci, '/circle/dependencies/override', jp.get(build, '/stages/setup').map(function (item) {
+        jp.set(ci, '/circle/dependencies/pre', jp.get(build, '/stages/setup').map(function (item) {
           var k = concatter(item, '; ');
           var out = {}
           out[k] = JSON.parse(JSON.stringify(percommand));
@@ -146,13 +146,17 @@ function convert (data) {
       }
       if (jp.has(build, '/stages/build')) {
         // TODO is 'test' the right thing here
-        jp.set(ci, '/circle/test/override', jp.get(build, '/stages/build').map(function (item) {
+        jp.set(ci, '/circle/dependencies/override', jp.get(build, '/stages/build').map(function (item) {
           var k = concatter(item, '; ');
           var out = {}
           out[k] = JSON.parse(JSON.stringify(percommand));
           return out;
         }));
       }
+
+      jp.set(ci, '/circle/test/override', [
+        'true'
+      ]);
     }
   });
 
