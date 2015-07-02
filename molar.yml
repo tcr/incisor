@@ -8,8 +8,18 @@ builds:
         - setlocal & echo %cd% & cd c:\ & echo %cd% & endlocal
         - ps: "powershell{ get-location; cd c:\\; get-location }"
         - ps: "powershell{ get-location; cd c:\\; get-location }"
-        - ps: get-location; cd c:\; get-location
-        - ps: get-location; cd c:\; get-location
+        - ps:
+          - get-location
+          - cd c:\
+          - get-location
+        - ps:
+          - get-location
+          - cd c:\
+          - get-location
+        - cmd:
+          - echo %cd%
+          - cd c:\
+          - echo %cd%
 
   - os: linux
     stages:
@@ -19,7 +29,9 @@ builds:
         - (pwd; cd /)
         - (pwd; cd /)
         - (pwd; cd /)
-        - pwd; cd /
+        -
+          - pwd
+          - cd /
         - pwd; cd /
         - pwd; cd /
 
@@ -28,7 +40,7 @@ builds:
       setup:
         - echo Setup OSX
       build:
-        - (pwd; cd /)
+        - ps -p $$
         - (pwd; cd /)
         - (pwd; cd /)
         - pwd; cd /

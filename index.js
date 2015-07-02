@@ -14,6 +14,13 @@ var quote = require('shell-quote').quote;
   }
 })();
 
+function concatter (list, arg) {
+  if (typeof list == 'string') {
+    return concatter([list], arg);
+  }
+  return list.join(arg);
+}
+
 function convert (data) {
   var ci = {};
 
@@ -39,18 +46,18 @@ function convert (data) {
         })
       }
 
-      function formatcmd (item) {
+      var formatcmd = function (item) {
         if (typeof item == 'string') {
           return formatcmd({cmd: item});
         }
         if ('cmd' in item) {
-          return {cmd: 'setlocal & ' + item.cmd + ' & endlocal'};
+          return {cmd: 'setlocal & ' + concatter(item.cmd, ' & ') + ' & endlocal'};
         }
         if ('ps' in item) {
-          return {ps: 'powershell{ ' + item.ps + ' }'};
+          return {ps: 'powershell{ ' + concatter(item.ps, '; ') + ' }'};
         } 
         if ('cygwin' in item) {
-          return '%CYG_BASH% -lc "exec 0</dev/null; ' + item.cygwin.replace(/"/g, '""').slice(0, -1) + ' "\n'
+          return '%CYG_BASH% -lc "exec 0</dev/null; ' + concatter(item.cygwin, '; ').replace(/"/g, '""').slice(0, -1) + ' "\n'
         }
         return item;
       }
@@ -74,15 +81,17 @@ function convert (data) {
 
       // TODO git autocrlf
 
+      var formatcmd = function (item) {
+        return '$( ' + concatter(item, '; ') + ' )';
+      }
+
       if (jp.has(build, '/stages/setup')) {
-        jp.set(ci, '/travis/install', jp.get(build, '/stages/setup').map(function (item) {
-          return '( ' + item + ' )';
-        }));
+        jp.set(ci, '/travis/install', [
+          'set -o posix -e'
+        ].concat(jp.get(build, '/stages/setup').map(formatcmd)));
       }
       if (jp.has(build, '/stages/build')) {
-        jp.set(ci, '/travis/script', jp.get(build, '/stages/build').map(function (item) {
-          return '( ' + item + ' )';
-        }));
+        jp.set(ci, '/travis/script', jp.get(build, '/stages/build').map(formatcmd));
       }
     }
 
@@ -98,11 +107,15 @@ function convert (data) {
         'true'
       ]);
       if (jp.has(build, '/stages/setup')) {
-        jp.set(ci, '/circle/dependencies/override', jp.get(build, '/stages/setup'));
+        jp.set(ci, '/circle/dependencies/override', jp.get(build, '/stages/setup').map(function (item) {
+          return concatter(item, '; ')
+        }));
       }
       if (jp.has(build, '/stages/build')) {
         // TODO is 'test' the right thing here
-        jp.set(ci, '/circle/test/override', jp.get(build, '/stages/build'));
+        jp.set(ci, '/circle/test/override', jp.get(build, '/stages/build').map(function (item) {
+          return concatter(item, '; ')
+        }));
       }
     }
   });

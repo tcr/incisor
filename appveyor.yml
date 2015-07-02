@@ -9,6 +9,7 @@ build_script:
   - ps: "powershell{ powershell{ get-location; cd c:\\; get-location } }"
   - ps: "powershell{ get-location; cd c:\\; get-location }"
   - ps: "powershell{ get-location; cd c:\\; get-location }"
+  - cmd: "setlocal & echo %cd% & cd c:\\ & echo %cd% & endlocal"
 clone_depth: 10
 cache:
   - '%CYG_CACHE%'

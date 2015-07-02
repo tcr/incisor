@@ -1,14 +1,15 @@
 env:
   global: []
 install:
-  - ( echo Setup OSX )
+  - set -o posix -e
+  - $( echo Setup OSX )
 script:
-  - ( (pwd; cd /) )
-  - ( (pwd; cd /) )
-  - ( (pwd; cd /) )
-  - ( pwd; cd / )
-  - ( pwd; cd / )
-  - ( pwd; cd / )
+  - $( ps -p $$ )
+  - $( (pwd; cd /) )
+  - $( (pwd; cd /) )
+  - $( pwd; cd / )
+  - $( pwd; cd / )
+  - $( pwd; cd / )
 language: objective-c
 notifications:
   email: false

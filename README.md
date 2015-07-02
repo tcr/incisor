@@ -1,6 +1,14 @@
-# molar
+# incisor
 
 CI integration shouldn't be like pulling teeth!
+
+stages:
+
+* setup
+* build
+* test
+
+All commands run in separate subshells.
 
 ---
 
@@ -36,7 +44,7 @@ env:
 
 folder:
 
-* appveyor: folder preserved between commands (same shell?)
+* appveyor: folder preserved between commands (same shell)
 * circle: folder not preserved between commands (separate subshells)
 * travis: folder preserved between commands (same shell)
 
@@ -45,13 +53,3 @@ secure variables:
 * appveyor: encrypted through ui, specified in yaml
 * circle: encrypted through ui, automatically in env
 * travis: encrypted through ui, automatically in env
-
----
-
-Learning:
-
-stages:
-
-* setup
-* build
-* test
