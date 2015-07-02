@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 var yaml = require('js-yaml');
-var molar = require('./');
+var incisor = require('./');
 var fs = require('fs');
 
 var data = yaml.safeLoad(fs.readFileSync(process.argv[2], 'utf-8'))
 
-var ci = molar.convert(data);
+var ci = incisor.convert(data);
 
 if (ci.circle) {
   console.log('writing circle')

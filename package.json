@@ -1,14 +1,17 @@
 {
-  "name": "molar",
+  "name": "incisor",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "node test.js"
   },
+  "bin": {
+    "incisor": "incisor"
+  },
   "keywords": [],
   "author": "Tim Cameron Ryan",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "difflet": "^0.2.6",
     "js-yaml": "^3.3.1",

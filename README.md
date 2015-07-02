@@ -14,6 +14,8 @@ stages:
 
 All commands run in separate subshells.
 
+Test isn't currently implemented.
+
 ---
 
 OSes:
