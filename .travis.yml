@@ -1,15 +1,20 @@
+before_install:
+  - 'export HELLO=$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
 env:
-  global: []
+  global:
+    - MOLAR=1
+    - HELLO=U2FsdGVkX1940igK3ga6hIrpkZZgQShveatTFrIx0Gc=
 install:
-  - set -o posix -e
-  - $( echo Setup OSX )
-script:
-  - $( ps -p $$ )
-  - $( (pwd; cd /) )
-  - $( (pwd; cd /) )
-  - $( pwd; cd / )
-  - $( pwd; cd / )
-  - $( pwd; cd / )
+  - 'a() { set -e; }'
+  - 'z() { E=$?; test $E -eq 0 || return $E; }'
+  - (a; echo Setup OSX );z
+before_script:
+  - '(a; echo "A greeting:" $HELLO );z'
+  - (a; (pwd; cd /) );z
+  - (a; (pwd; cd /) );z
+  - (a; pwd; cd / );z
+  - (a; pwd; cd / );z
+script: []
 language: objective-c
 notifications:
   email: false

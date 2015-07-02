@@ -1,15 +1,21 @@
 environment:
-  global: {}
+  global:
+    MOLAR: 1
+    HELLO: U2FsdGVkX1940igK3ga6hIrpkZZgQShveatTFrIx0Gc=
+init:
+  - ps: '$env:HELLO = echo $env:HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$env:ENV_SECRET'
 install:
   - cmd: 'setlocal & echo Setup Windows & endlocal'
 build_script:
+  - ps: 'powershell{ echo "A greeting:" $env:HELLO }'
   - cmd: "setlocal & setlocal & echo %cd% & cd c:\\ & echo %cd% & endlocal & endlocal"
   - cmd: "setlocal & setlocal & echo %cd% & cd c:\\ & echo %cd% & endlocal & endlocal"
-  - ps: "powershell{ powershell{ get-location; cd c:\\; get-location } }"
-  - ps: "powershell{ powershell{ get-location; cd c:\\; get-location } }"
-  - ps: "powershell{ get-location; cd c:\\; get-location }"
-  - ps: "powershell{ get-location; cd c:\\; get-location }"
   - cmd: "setlocal & echo %cd% & cd c:\\ & echo %cd% & endlocal"
+  - cmd: "setlocal & echo %cd% & cd c:\\ & echo %cd% & endlocal"
+  - ps: "powershell{ powershell{ get-location; cd c:\\; get-location } }"
+  - ps: "powershell{ powershell{ get-location; cd c:\\; get-location } }"
+  - ps: "powershell{ get-location; cd c:\\; get-location }"
+  - ps: "powershell{ get-location; cd c:\\; get-location }"
 clone_depth: 10
 cache:
   - '%CYG_CACHE%'

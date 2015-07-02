@@ -36,11 +36,20 @@ function convert (data) {
       jp.set(ci, '/appveyor/environment/global', env = {});
       augment(env, jp.get(build, '/env', {}));
       augment(env, jp.get(data, '/common/env', {}));
+      augment(env, jp.get(data, '/common/secret_env', {}));
+
+      jp.has(ci, '/appveyor/init') || jp.set(ci, '/appveyor/init', []);
+      var secrets = jp.get(data, '/common/secret_env', {})
+      Object.keys(secrets).map(function (key) {
+        jp.get(ci, '/appveyor/init').push({
+          ps: '$env:' + key + ' = echo $env:' + key + ' | openssl enc -aes-128-cbc -a -d -salt -pass pass:$env:ENV_SECRET'
+        })
+      });
 
       if (jp.has(build, '/git')) {
         Object.keys(jp.get(build, '/git')).map(function (key) {
           if (key == 'autocrlf') {
-            jp.set(ci, '/appveyor/init', []);
+            jp.has(ci, '/appveyor/init') || jp.set(ci, '/appveyor/init', []);
             jp.get(ci, '/appveyor/init').push('git config --global core.autocrlf ' + jp.get(build, '/git/autocrlf'))
           }
         })
@@ -74,6 +83,15 @@ function convert (data) {
       var env = {};
       augment(env, jp.get(build, '/env', {}));
       augment(env, jp.get(data, '/common/env', {}));
+      augment(env, jp.get(data, '/common/secret_env', {}));
+
+      jp.has(ci, '/travis/before_install') || jp.set(ci, '/travis/before_install', []);
+      var secrets = jp.get(data, '/common/secret_env', {})
+      Object.keys(secrets).map(function (key) {
+        jp.get(ci, '/travis/before_install').push(
+          'export ' + key + '=$(echo $' + key + ' | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+        )
+      });
 
       jp.set(ci, '/travis/env/global', Object.keys(env).map(function (key) {
         return key + '=' + quote([env[key]]);
@@ -82,17 +100,19 @@ function convert (data) {
       // TODO git autocrlf
 
       var formatcmd = function (item) {
-        return '$( ' + concatter(item, '; ') + ' )';
+        return '(a; ' + concatter(item, '; ') + ' );z';
       }
 
       if (jp.has(build, '/stages/setup')) {
         jp.set(ci, '/travis/install', [
-          'set -o posix -e'
+          'a() { set -e; }',
+          'z() { E=$?; test $E -eq 0 || return $E; }',
         ].concat(jp.get(build, '/stages/setup').map(formatcmd)));
       }
       if (jp.has(build, '/stages/build')) {
-        jp.set(ci, '/travis/script', jp.get(build, '/stages/build').map(formatcmd));
+        jp.set(ci, '/travis/before_script', jp.get(build, '/stages/build').map(formatcmd));
       }
+      jp.set(ci, '/travis/script', []);
     }
 
     if (build.os == 'linux') {
@@ -100,6 +120,17 @@ function convert (data) {
       jp.set(ci, '/circle/machine/environment', env = {});
       augment(env, jp.get(build, '/env', {}));
       augment(env, jp.get(data, '/common/env', {}));
+      augment(env, jp.get(data, '/common/secret_env', {}));
+
+      var secrets = jp.get(data, '/common/secret_env', {})
+      var percommand = {
+        environment: {}
+      };
+      Object.keys(secrets).map(function (key) {
+        percommand.environment[key] = '$(echo $' + key + ' | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+      });
+      
+        // environment: HELLO: $(echo U2FsdGVkX1940igK3ga6hIrpkZZgQShveatTFrIx0Gc= | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)
 
       // TODO git autocrlf
 
@@ -108,13 +139,19 @@ function convert (data) {
       ]);
       if (jp.has(build, '/stages/setup')) {
         jp.set(ci, '/circle/dependencies/override', jp.get(build, '/stages/setup').map(function (item) {
-          return concatter(item, '; ')
+          var k = concatter(item, '; ');
+          var out = {}
+          out[k] = JSON.parse(JSON.stringify(percommand));
+          return out;
         }));
       }
       if (jp.has(build, '/stages/build')) {
         // TODO is 'test' the right thing here
         jp.set(ci, '/circle/test/override', jp.get(build, '/stages/build').map(function (item) {
-          return concatter(item, '; ')
+          var k = concatter(item, '; ');
+          var out = {}
+          out[k] = JSON.parse(JSON.stringify(percommand));
+          return out;
         }));
       }
     }

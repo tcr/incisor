@@ -1,15 +1,28 @@
 machine:
-  environment: {}
+  environment:
+    MOLAR: 1
+    HELLO: U2FsdGVkX1940igK3ga6hIrpkZZgQShveatTFrIx0Gc=
 dependencies:
   override:
-    - echo Setup Linux
+    - echo Setup Linux:
+        environment:
+          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
 test:
   override:
-    - (pwd; cd /)
-    - (pwd; cd /)
-    - (pwd; cd /)
-    - pwd; cd /
-    - pwd; cd /
-    - pwd; cd /
+    - 'echo "A greeting:" $HELLO':
+        environment:
+          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+    - (pwd; cd /):
+        environment:
+          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+    - (pwd; cd /):
+        environment:
+          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+    - pwd; cd /:
+        environment:
+          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+    - pwd; cd /:
+        environment:
+          HELLO: '$(echo $HELLO | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
 general:
   build_dir: .
