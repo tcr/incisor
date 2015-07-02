@@ -174,6 +174,9 @@ function convert (data) {
   }
 
   if (jp.has(ci, '/travis')) {
+    // To match Circle CI
+    jp.set(ci, '/travis/git/depth', 10);
+
     // Force OS X.
     jp.set(ci, '/travis/language', 'objective-c');
 
