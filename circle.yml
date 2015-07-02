@@ -5,6 +5,11 @@ dependencies:
     - echo Setup Linux
 test:
   override:
-    - echo Build Linux
+    - (pwd; cd /)
+    - (pwd; cd /)
+    - (pwd; cd /)
+    - pwd; cd /
+    - pwd; cd /
+    - pwd; cd /
 general:
   build_dir: .

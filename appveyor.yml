@@ -1,9 +1,14 @@
 environment:
   global: {}
 install:
-  - echo Setup Windows
+  - cmd: 'setlocal & echo Setup Windows & endlocal'
 build_script:
-  - echo Build Windows
+  - cmd: "setlocal & setlocal & echo %cd% & cd c:\\ & echo %cd% & endlocal & endlocal"
+  - cmd: "setlocal & setlocal & echo %cd% & cd c:\\ & echo %cd% & endlocal & endlocal"
+  - ps: "powershell{ powershell{ get-location; cd c:\\; get-location } }"
+  - ps: "powershell{ powershell{ get-location; cd c:\\; get-location } }"
+  - ps: "powershell{ get-location; cd c:\\; get-location }"
+  - ps: "powershell{ get-location; cd c:\\; get-location }"
 clone_depth: 10
 cache:
   - '%CYG_CACHE%'

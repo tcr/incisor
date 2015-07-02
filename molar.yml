@@ -4,18 +4,33 @@ builds:
       setup:
         - echo Setup Windows
       build:
-        - echo Build Windows
+        - setlocal & echo %cd% & cd c:\ & echo %cd% & endlocal
+        - setlocal & echo %cd% & cd c:\ & echo %cd% & endlocal
+        - ps: "powershell{ get-location; cd c:\\; get-location }"
+        - ps: "powershell{ get-location; cd c:\\; get-location }"
+        - ps: get-location; cd c:\; get-location
+        - ps: get-location; cd c:\; get-location
 
   - os: linux
     stages:
       setup:
         - echo Setup Linux
       build:
-        - echo Build Linux
+        - (pwd; cd /)
+        - (pwd; cd /)
+        - (pwd; cd /)
+        - pwd; cd /
+        - pwd; cd /
+        - pwd; cd /
 
   - os: osx
     stages:
       setup:
         - echo Setup OSX
       build:
-        - echo Build OSX
+        - (pwd; cd /)
+        - (pwd; cd /)
+        - (pwd; cd /)
+        - pwd; cd /
+        - pwd; cd /
+        - pwd; cd /

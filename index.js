@@ -39,11 +39,27 @@ function convert (data) {
         })
       }
 
+      function formatcmd (item) {
+        if (typeof item == 'string') {
+          return formatcmd({cmd: item});
+        }
+        if ('cmd' in item) {
+          return {cmd: 'setlocal & ' + item.cmd + ' & endlocal'};
+        }
+        if ('ps' in item) {
+          return {ps: 'powershell{ ' + item.ps + ' }'};
+        } 
+        if ('cygwin' in item) {
+          return '%CYG_BASH% -lc "exec 0</dev/null; ' + item.cygwin.replace(/"/g, '""').slice(0, -1) + ' "\n'
+        }
+        return item;
+      }
+
       if (jp.has(build, '/stages/setup')) {
-        jp.set(ci, '/appveyor/install', jp.get(build, '/stages/setup'));
+        jp.set(ci, '/appveyor/install', jp.get(build, '/stages/setup').map(formatcmd));
       }
       if (jp.has(build, '/stages/build')) {
-        jp.set(ci, '/appveyor/build_script', jp.get(build, '/stages/build'));
+        jp.set(ci, '/appveyor/build_script', jp.get(build, '/stages/build').map(formatcmd));
       }
     }
 
@@ -59,10 +75,14 @@ function convert (data) {
       // TODO git autocrlf
 
       if (jp.has(build, '/stages/setup')) {
-        jp.set(ci, '/travis/install', jp.get(build, '/stages/setup'));
+        jp.set(ci, '/travis/install', jp.get(build, '/stages/setup').map(function (item) {
+          return '( ' + item + ' )';
+        }));
       }
       if (jp.has(build, '/stages/build')) {
-        jp.set(ci, '/travis/script', jp.get(build, '/stages/build'));
+        jp.set(ci, '/travis/script', jp.get(build, '/stages/build').map(function (item) {
+          return '( ' + item + ' )';
+        }));
       }
     }
 
@@ -101,15 +121,6 @@ function convert (data) {
 
     // Build only master branch.
     jp.set(ci, '/appveyor/branches/only', ['master']);
-
-    // Convert cygwin steps
-    jp.set(ci, '/appveyor/build_script', jp.get(ci, '/appveyor/build_script').map(function (item) {
-      if (jp.has(item, '/cygwin')) {
-        return '%CYG_BASH% -lc "exec 0</dev/null; ' + item.cygwin.replace(/"/g, '""').slice(0, -1) + ' "\n'
-      } else {
-        return item;
-      }
-    }));
   }
 
   if (jp.has(ci, '/travis')) {

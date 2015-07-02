@@ -1,9 +1,14 @@
 env:
   global: []
 install:
-  - echo Setup OSX
+  - ( echo Setup OSX )
 script:
-  - echo Build OSX
+  - ( (pwd; cd /) )
+  - ( (pwd; cd /) )
+  - ( (pwd; cd /) )
+  - ( pwd; cd / )
+  - ( pwd; cd / )
+  - ( pwd; cd / )
 language: objective-c
 notifications:
   email: false
