@@ -110,9 +110,8 @@ function convert (data) {
         ].concat(jp.get(build, '/stages/setup').map(formatcmd)));
       }
       if (jp.has(build, '/stages/build')) {
-        jp.set(ci, '/travis/after_script', jp.get(build, '/stages/build').map(formatcmd));
+        jp.set(ci, '/travis/script', jp.get(build, '/stages/build').map(formatcmd));
       }
-      jp.set(ci, '/travis/script', []);
     }
 
     if (build.os == 'linux') {
