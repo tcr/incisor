@@ -8,6 +8,8 @@ install:
 before_script:
   - (a; npm test );z
 script: []
+git:
+  depth: 10
 language: objective-c
 notifications:
   email: false
