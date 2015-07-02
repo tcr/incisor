@@ -15,8 +15,8 @@ var quote = require('shell-quote').quote;
 })();
 
 function concatter (list, arg) {
-  if (typeof list == 'string') {
-    return concatter([list], arg);
+  if (!Array.isArray(list)) {
+    return concatter([String(list)], arg);
   }
   return list.join(arg);
 }
@@ -106,11 +106,11 @@ function convert (data) {
       if (jp.has(build, '/stages/setup')) {
         jp.set(ci, '/travis/install', [
           'a() { set -e; }',
-          'z() { E=$?; test $E -eq 0 || return $E; }',
+          'z() { E=$?; test $E -eq 0 && return 0; printf "\\n\\033[1;31mThe command failed with exit code $?.\\033[0m"; set -e; return $E; }',
         ].concat(jp.get(build, '/stages/setup').map(formatcmd)));
       }
       if (jp.has(build, '/stages/build')) {
-        jp.set(ci, '/travis/before_script', jp.get(build, '/stages/build').map(formatcmd));
+        jp.set(ci, '/travis/after_script', jp.get(build, '/stages/build').map(formatcmd));
       }
       jp.set(ci, '/travis/script', []);
     }

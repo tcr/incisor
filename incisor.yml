@@ -19,3 +19,5 @@ builds:
         - npm install
       build:
         - npm test
+        - false
+        - echo dont go here
