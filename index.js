@@ -42,7 +42,7 @@ function convert (data) {
       var secrets = jp.get(data, '/common/secret_env', {})
       Object.keys(secrets).map(function (key) {
         jp.get(ci, '/appveyor/init').push({
-          ps: '$env:' + key + ' = echo $env:' + key + ' | openssl enc -aes-128-cbc -a -d -salt -pass pass:$env:ENV_SECRET'
+          ps: '$env:' + key + ' = echo $env:' + key + ' | openssl enc -aes-128-cbc -a -A -d -salt -pass pass:$env:ENV_SECRET'
         })
       });
 
@@ -89,7 +89,7 @@ function convert (data) {
       var secrets = jp.get(data, '/common/secret_env', {})
       Object.keys(secrets).map(function (key) {
         jp.get(ci, '/travis/before_install').push(
-          'export ' + key + '=$(echo $' + key + ' | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+          'export ' + key + '=$(echo $' + key + ' | openssl enc -aes-128-cbc -a -A -d -salt -pass pass:$ENV_SECRET)'
         )
       });
 
@@ -126,10 +126,10 @@ function convert (data) {
         environment: {}
       };
       Object.keys(secrets).map(function (key) {
-        percommand.environment[key] = '$(echo $' + key + ' | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)'
+        percommand.environment[key] = '$(echo $' + key + ' | openssl enc -aes-128-cbc -a -A -d -salt -pass pass:$ENV_SECRET)'
       });
       
-        // environment: HELLO: $(echo U2FsdGVkX1940igK3ga6hIrpkZZgQShveatTFrIx0Gc= | openssl enc -aes-128-cbc -a -d -salt -pass pass:$ENV_SECRET)
+        // environment: HELLO: $(echo U2FsdGVkX1940igK3ga6hIrpkZZgQShveatTFrIx0Gc= | openssl enc -aes-128-cbc -a -A -d -salt -pass pass:$ENV_SECRET)
 
       // TODO git autocrlf
 
