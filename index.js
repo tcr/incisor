@@ -66,7 +66,7 @@ function convert (data) {
           return {ps: 'powershell{ ' + concatter(item.ps, '; ') + ' }'};
         } 
         if ('cygwin' in item) {
-          return '%CYG_BASH% -lc "exec 0</dev/null; set -e; ' + concatter(item.cygwin, '; ').replace(/"/g, '""').replace(/\s+$/, '') + ' "\n'
+          return '%CYG_BASH% -lc "exec 0</dev/null; set -e; ' + concatter(item.cygwin, '; ').replace(/"/g, '""').replace(/\s+$/, '').replace(/\n/g, ' ; ') + ' "\n'
         }
         return item;
       }
