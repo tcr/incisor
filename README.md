@@ -2,23 +2,39 @@
 
 CI integration shouldn't be like pulling teeth!
 
-<code>Windows: [![Build status](https://ci.appveyor.com/api/projects/status/bcfogndqpcfiau67/branch/master?svg=true)](https://ci.appveyor.com/project/tcr/incisor/branch/master)</code><br>
-<code>Linux:&nbsp;&nbsp; [![Circle CI](https://circleci.com/gh/tcr/incisor/tree/master.svg?style=shield)](https://circleci.com/gh/tcr/incisor/tree/master)</code><br>
-<code>OS X:&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.org/tcr/incisor.svg?branch=master)](https://travis-ci.org/tcr/incisor)</code>
+[![Windows Build status](https://img.shields.io/appveyor/ci/tcr/incisor.svg?label=windows)](https://ci.appveyor.com/project/tcr/incisor/branch/master)
+[![OS X Build Status](https://img.shields.io/travis/tcr/incisor.svg?label=os%20x)](https://travis-ci.org/tcr/incisor)
+[![Linux Build Status](https://img.shields.io/circleci/project/tcr/incisor.svg?label=linux)](https://circleci.com/gh/tcr/incisor)
+
+install:
+
+```
+npm install -g git+https://github.com/tcr/incisor
+```
+
+usage:
+
+```
+incisor init
+incisor generate
+incisor badges >> README.md
+```
+
+## how to use
 
 stages:
 
 * setup
 * build
-* test
+* test (not currently implemented.)
 
 All commands run in separate subshells.
 
-Test isn't currently implemented.
+Secret key should be saved in your CI system's UI as `ENV_SECRET`.
 
-Secret key: `ENV_SECRET`
+TODO: document the rest
 
----
+## how do the ci systems differ?
 
 OSes:
 

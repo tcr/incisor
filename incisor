@@ -4,21 +4,55 @@ var yaml = require('js-yaml');
 var incisor = require('./');
 var fs = require('fs');
 
-var data = yaml.safeLoad(fs.readFileSync(process.argv[2], 'utf-8'))
+if (process.argv[2] == 'init') {
+	if (fs.existsSync('incisor.yml')) {
+		console.error('will not overwrite incisor.yml!');
+		process.exit(1);
+	}
 
-var ci = incisor.convert(data);
-
-if (ci.circle) {
-  console.log('writing circle')
-  fs.writeFileSync('circle.yml', yaml.safeDump(ci.circle));
-}
-if (ci.appveyor) {
-  console.log('writing appveyor')
-  fs.writeFileSync('appveyor.yml', yaml.safeDump(ci.appveyor));
-}
-if (ci.travis) {
-  console.log('writing travis')
-  fs.writeFileSync('.travis.yml', yaml.safeDump(ci.travis));
+	console.error('writing default incisor.yml');
+	fs.writeFileSync('incisor.yml', fs.readFileSync(__dirname + '/init.yml'));
+	return;
 }
 
-console.log('dne');
+if (process.argv[2] == 'generate') {
+	var data = yaml.safeLoad(fs.readFileSync(process.argv[3] || 'incisor.yml', 'utf-8'))
+
+	var ci = incisor.convert(data);
+
+	if (ci.circle) {
+	  console.error('writing circle')
+	  fs.writeFileSync('circle.yml', yaml.safeDump(ci.circle));
+	}
+	if (ci.appveyor) {
+	  console.error('writing appveyor')
+	  fs.writeFileSync('appveyor.yml', yaml.safeDump(ci.appveyor));
+	}
+	if (ci.travis) {
+	  console.error('writing travis')
+	  fs.writeFileSync('.travis.yml', yaml.safeDump(ci.travis));
+	}
+
+	console.error('done');
+	return;
+}
+
+if (process.argv[2] == 'badges') {
+	var user = process.argv[3];
+	var project = process.argv[4];
+	if (!user || !project) {
+		console.error('please specify a user and project to generate badges')
+		process.exit(1)
+	}
+
+	console.log('[![Windows Build status](https://img.shields.io/appveyor/ci/' + user + '/' + project + '.svg?label=windows)](https://ci.appveyor.com/project/' + user + '/' + project + '/branch/master)');
+	console.log('[![OS X Build Status](https://img.shields.io/travis/' + user + '/' + project + '.svg?label=os%20x)](https://travis-ci.org/' + user + '/' + project + ')');
+	console.log('[![Linux Build Status](https://img.shields.io/circleci/project/' + user + '/' + project + '.svg?label=linux)](https://circleci.com/gh/' + user + '/' + project + ')');
+	return;
+}
+
+console.error('Usage:')
+console.error('    incisor init')
+console.error('    incisor generate [file.yml]')
+console.error('    incisor badges user project')
+process.exit(1);
