@@ -9,7 +9,7 @@ CI integration shouldn't be like pulling teeth!
 install:
 
 ```
-npm install -g git+https://github.com/tcr/incisor
+npm install -g incisor
 ```
 
 usage:
