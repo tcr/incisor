@@ -15,6 +15,12 @@ if (process.argv[2] == 'init') {
 	return;
 }
 
+if (process.argv[2] == 'hook') {
+	console.log('writing pre-commit hook')
+	fs.writeFileSync('./.git/hooks/pre-commit', '#!/bin/bash\n\n' + __filename + ' generate 2>/dev/null\n');
+	return;
+}
+
 if (process.argv[2] == 'generate') {
 	var data = yaml.safeLoad(fs.readFileSync(process.argv[3] || 'incisor.yml', 'utf-8'))
 
